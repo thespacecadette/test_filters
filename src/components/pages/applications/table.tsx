@@ -12,7 +12,7 @@ import Paper from '@mui/material/Paper';
 import { visuallyHidden } from '@mui/utils';
 import { Card } from '@mui/material';
 import { TableData, TableProps } from './types';
-import { HEAD_CELLS } from './data';
+import { FILTER_TABS, HEAD_CELLS } from './data';
 import { Application } from '../../../../mock_api_service/model/Application';
 
 const getRows = (data: Array<Application>): Array<TableData> => data.map((application: Application) => ({
@@ -47,6 +47,14 @@ function getComparator<Key extends keyof any>(
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
+
+function getFilter(data: Array<Application>, filter: string) {
+    return data.filter((application) => {
+        const keyDateLabel = Object.entries(application.attributes.key_dates)[0][0];
+
+        return keyDateLabel === filter;
+    })
+};
 
 interface EnhancedTableProps {
   onRequestSort: (event: React.MouseEvent<unknown>, property: keyof TableData) => void;
@@ -91,7 +99,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-export default function EnhancedTable({ data, isLoading }: TableProps) {
+export default function EnhancedTable({ data, isLoading, activeTab }: TableProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('keyDate');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
@@ -100,14 +108,16 @@ export default function EnhancedTable({ data, isLoading }: TableProps) {
   const [rows, setRows] = React.useState<Array<TableData>>([]);
 
   React.useEffect(() => {
-    const t = getRows(data);
+    const filteredData = activeTab === FILTER_TABS.ALL ? data : getFilter(data, activeTab);
+    console.log('isFiltered', filteredData);
+    const d = getRows(filteredData);
     const visibleRows = 
-        [...t]
+        [...d]
         .sort(getComparator(order, orderBy))
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     setRows(visibleRows);
-  }, [isLoading === false && data.length > 0])
+  }, [isLoading === false && data.length > 0]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,

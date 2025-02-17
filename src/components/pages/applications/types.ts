@@ -12,5 +12,6 @@ export interface TableData {
 export interface TableProps {
     data: Array<Application>;
     isLoading: boolean;
+    activeTab: string;
 }
 

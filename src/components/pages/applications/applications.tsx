@@ -18,7 +18,7 @@ interface ApplicationProps {
 }
 
 const Applications: React.FC<ApplicationProps> = ({  }) => {
-  const [activeTab, setActiveTab] = useState<string>(FILTER_TABS.ALL);
+  const [activeTab, setActiveTab] = useState<string>(FILTER_TABS.FIXED_RATE_EXPIRY);
   const [appData, setAppData] = useState<Array<Application>>([]);
 
   useEffect(() => {
@@ -45,9 +45,9 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
       <ButtonGroup variant="outlined" aria-label="Basic button group" style={{
         marginTop: `${SPACING_COMPONENT}px`,
       }}>
-        {Object.keys(FILTER_TABS).map((tab: string) => (<Button color={tab === activeTab ? 'primary' : 'secondary'} onClick={() => { setActiveTab(tab)}}>{tab}</Button>))}
+        {Object.entries(FILTER_TABS).map((tab: [string, string]) => (<Button color={tab[1] === activeTab ? 'primary' : 'secondary'} onClick={() => { setActiveTab(tab[1])}}>{tab[1]}</Button>))}
     </ButtonGroup>
-    <DataTable data={appData} isLoading={appData.length === 0} />
+    <DataTable data={appData} isLoading={appData.length === 0} activeTab={activeTab} />
     </Card>
   </div>);
 }
