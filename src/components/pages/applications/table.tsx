@@ -1,4 +1,5 @@
 import * as React from 'react';
+import moment from 'moment';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -18,7 +19,7 @@ const getRows = (data: Array<Application>): Array<TableData> => data.map((applic
     id: application.id,
     clientName: application.client_account.name,
     loanDetails: `${application.lender_reference} | $${application.amount} | ${application.purpose}`,
-    keyDate: Object.entries(application.attributes.key_dates)[0][1],
+    keyDate: moment(Object.entries(application.attributes.key_dates)[0][1]).format('DD/MM/YYYY'),
     type: application.type,
     contact: `m: ${application.client_account.primary_applicant_info.mobile} | email: ${application.client_account.primary_applicant_info.email}`,
 }))
@@ -39,8 +40,8 @@ function getComparator<Key extends keyof any>(
   order: Order,
   orderBy: Key,
 ): (
-  a: { [key in Key]: number | string },
-  b: { [key in Key]: number | string },
+  a: { [key in Key]: number | string | Date },
+  b: { [key in Key]: number | string | Date },
 ) => number {
   return order === 'desc'
     ? (a, b) => descendingComparator(a, b, orderBy)
@@ -92,10 +93,10 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function EnhancedTable({ data, isLoading }: TableProps) {
   const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof TableData>('clientName');
+  const [orderBy, setOrderBy] = React.useState<keyof TableData>('keyDate');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rowsPerPage, setRowsPerPage] = React.useState(20);
   const [rows, setRows] = React.useState<Array<TableData>>([]);
 
   React.useEffect(() => {
