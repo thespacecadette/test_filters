@@ -1,17 +1,30 @@
-import { useEffect } from 'react';
-import { Button, ButtonGroup, Card, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 // theme
 import { TAB_BUTTONS } from './data';
 import { SPACING_COMPONENT } from '../../../styles/theme';
+
+// components
 import DataTable from './table';
+import { Button, ButtonGroup, Card, Typography } from '@mui/material';
+
+// services
+import services from './../../../services/service'
+
+// types/models
+import { Application } from '../../../../mock_api_service/model/Application';
 
 interface ApplicationProps {
 }
 
 const Applications: React.FC<ApplicationProps> = ({  }) => {
+  const [appData, setAppData] = useState<Array<Application>>([]);
+
   useEffect(() => {
-    // TODO: load data
+    services.get(`${process.env.API_DOMAIN}/applications/get`)
+      .then((data) => {
+        setAppData(data.data);
+    });
   }, []);
 
   return (<div style={{
@@ -33,7 +46,7 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
       }}>
         {Object.keys(TAB_BUTTONS).map((tab: string) => (<Button>{tab}</Button>))}
     </ButtonGroup>
-    <DataTable />
+    <DataTable data={appData} isLoading={appData.length === 0} />
     </Card>
   </div>);
 }

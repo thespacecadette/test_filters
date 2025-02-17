@@ -16,7 +16,7 @@ interface ClientAccount {
 	name: string;
 }
 
-export interface Lender {
+export interface Application {
 	type: string;
 	id: string;
 	attributes: Attributes;
