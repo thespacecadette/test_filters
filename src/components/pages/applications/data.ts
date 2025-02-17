@@ -1,6 +1,7 @@
 import { TableData } from "./types";
 
-export const TAB_BUTTONS = {
+export const FILTER_TABS = {
+    ALL: 'All',
     FIXED_RATE_EXPIRY: 'Fixed Rate Expiry',
     AUCTION_DATE: 'Auction Date',
     PREAPPROVAL_EXPIRY: 'Pre-approval Expiry',

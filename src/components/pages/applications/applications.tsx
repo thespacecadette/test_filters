@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // theme
-import { TAB_BUTTONS } from './data';
+import { FILTER_TABS } from './data';
 import { SPACING_COMPONENT } from '../../../styles/theme';
 
 // components
@@ -18,6 +18,7 @@ interface ApplicationProps {
 }
 
 const Applications: React.FC<ApplicationProps> = ({  }) => {
+  const [activeTab, setActiveTab] = useState<string>(FILTER_TABS.ALL);
   const [appData, setAppData] = useState<Array<Application>>([]);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
       <ButtonGroup variant="outlined" aria-label="Basic button group" style={{
         marginTop: `${SPACING_COMPONENT}px`,
       }}>
-        {Object.keys(TAB_BUTTONS).map((tab: string) => (<Button>{tab}</Button>))}
+        {Object.keys(FILTER_TABS).map((tab: string) => (<Button color={tab === activeTab ? 'primary' : 'secondary'} onClick={() => { setActiveTab(tab)}}>{tab}</Button>))}
     </ButtonGroup>
     <DataTable data={appData} isLoading={appData.length === 0} />
     </Card>

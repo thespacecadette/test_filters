@@ -7,34 +7,21 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
 import Paper from '@mui/material/Paper';
 import { visuallyHidden } from '@mui/utils';
 import { Card } from '@mui/material';
 import { TableData, TableProps } from './types';
 import { HEAD_CELLS } from './data';
+import { Application } from '../../../../mock_api_service/model/Application';
 
-function createData(
-  id: string,
-  clientName: string,
-  loanDetails: string,
-  keyDate: string,
-  type: string,
-  contact: string,
-): TableData {
-  return {
-    id,
-    clientName,
-    loanDetails,
-    keyDate,
-    type,
-    contact,
-  };
-}
-
-const rows = [
-    createData('12312323', 'Courtney & Jay Henry', '$123000000', '12/09/2024', 'Pre-approval expiry', 'm: 0444444444')
-];
+const getRows = (data: Array<Application>): Array<TableData> => data.map((application: Application) => ({
+    id: application.id,
+    clientName: application.client_account.name,
+    loanDetails: `${application.lender_reference} | $${application.amount} | ${application.purpose}`,
+    keyDate: Object.entries(application.attributes.key_dates)[0][1],
+    type: application.type,
+    contact: `m: ${application.client_account.primary_applicant_info.mobile} | email: ${application.client_account.primary_applicant_info.email}`,
+}))
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -103,29 +90,23 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-interface EnhancedTableToolbarProps {
-}
-
-function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
-  return (
-    <Toolbar
-      sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-        },
-      ]}
-    >
-    </Toolbar>
-  );
-}
-
 export default function EnhancedTable({ data, isLoading }: TableProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('clientName');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [rows, setRows] = React.useState<Array<TableData>>([]);
+
+  React.useEffect(() => {
+    const t = getRows(data);
+    const visibleRows = 
+        [...t]
+        .sort(getComparator(order, orderBy))
+        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+    setRows(visibleRows);
+  }, [isLoading === false && data.length > 0])
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -135,7 +116,6 @@ export default function EnhancedTable({ data, isLoading }: TableProps) {
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
-
   const handleClick = (event: React.MouseEvent<unknown>, id: number) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected: readonly number[] = [];
@@ -159,22 +139,13 @@ export default function EnhancedTable({ data, isLoading }: TableProps) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
-    () =>
-      [...rows]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage],
-  );
-
-  if (isLoading) {
+  if (isLoading || rows.length === 0) {
     return (<Card>Loading... </Card>)
   }
 
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -188,7 +159,7 @@ export default function EnhancedTable({ data, isLoading }: TableProps) {
               rowCount={rows.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
+              {rows.map((row, index) => {
                 const isItemSelected = selected.includes(parseInt(row.id, 10));
                 const labelId = `enhanced-table-checkbox-${index}`;
 
