@@ -22,6 +22,7 @@ import { Application } from '../../../../mock_api_service/model/Application';
 
 // styles
 import "react-datepicker/dist/react-datepicker.css";
+import { InfiniteScroller } from '../../ui/infiniteScroller';
 
 interface ApplicationProps {
 }
@@ -32,21 +33,16 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
   const [startDate, setStartDate] = useState(dayjs().subtract(30, 'day').toDate());
   const [endDate, setEndDate] = useState(dayjs().toDate());
   const [showCalendar, setCalendarView] = useState(false);
+  const [pagination, setPagination] = useState(1);
 
   useEffect(() => {
-    services.get(`${process.env.API_DOMAIN}/applications/get`)
+    services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}`)
       .then((data) => {
         setAppData(data.data);
     });
   }, []);
 
-  return (<div style={{
-    // TODO: export to styles
-    height: '100%',
-    textAlign: 'center',
-    width: '100%',
-    backgroundColor: '#f1f1f1',
-  }}>
+  return (
     <Card style={{
       margin: '0 auto',
       width: '100%'
@@ -101,17 +97,31 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
           </IconButton>
         </Toolbar>
       </AppBar>
-    <DataTable
-      data={appData}
-      filters={{
-        activeTab,
-        startDate,
-        endDate,
-      }}
+    <InfiniteScroller
+      onScrollToBottom={() => {
+        alert('Load data now that youre at the bottom');
+        setPagination(pagination + 1);
+        
+        services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}`)
+        .then((data) => {
+            setAppData(data.data);
+        });
+        // TODO: Add BE service to paginate data
+        // TODO: Update data set to next subset and update setAppData(payload) with response
+       }}
       isLoading={appData.length === 0}
-    />
-    </Card>
-  </div>);
+    >
+      <DataTable
+        data={appData}
+        filters={{
+          activeTab,
+          startDate,
+          endDate,
+        }}
+        isLoading={appData.length === 0}
+      />
+    </InfiniteScroller>
+  </Card>);
 }
 
 export default Applications;

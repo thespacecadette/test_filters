@@ -14,7 +14,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
-import { Card, Typography } from '@mui/material';
+import { Card } from '@mui/material';
 
 // types & data
 import { Filters, TableData, TableProps } from './types';
@@ -144,7 +144,7 @@ export default function EnhancedTable({ data, filters, isLoading  }: TableProps)
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('keyDate');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(20);
+  const [rowsPerPage, setRowsPerPage] = React.useState(4);
   const [rows, setRows] = React.useState<Array<TableData>>([]);
 
   React.useEffect(() => {

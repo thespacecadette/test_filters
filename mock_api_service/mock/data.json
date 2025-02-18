@@ -2494,5 +2494,29 @@
         },
         "name": "Fred Casey"
       }
+    },
+    {
+      "type": "Application",
+      "id": "38bd5a5d-9fa0-4b97-9a2c-66dcf56c5581",
+      "attributes": {
+        "past_key_dates": {
+          "Fixed Rate Expiry": "30/04/2024"
+        },
+        "key_dates": {
+          "Fixed Rate Expiry": "01/29/2025"
+        }
+      },
+      "lender_reference": "WES",
+      "purpose": "Purchase Vacant Land",
+      "amount": 120000,
+      "user_reference": 756780,
+      "client_account": {
+        "id": "45f3a14c-c1e8-42b0-a057-e38511057f22",
+        "primary_applicant_info": {
+          "mobile": "3680.9514",
+          "email": "fcasey@example.com"
+        },
+        "name": "Tina Fey"
+      }
     }
   ]
