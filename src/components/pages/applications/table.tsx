@@ -42,6 +42,18 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0;
 }
 
+function formatKeyDate(keyDate: string) {
+  if (dayjs(keyDate).isAfter(dayjs().subtract(2, 'day'))){
+    return 'red';
+  }
+
+  if (dayjs(keyDate).isAfter(dayjs().subtract(4, 'day'))){
+    return 'amber';
+  }
+
+  return 'grey';
+}
+
 type Order = 'asc' | 'desc';
 
 function getComparator<Key extends keyof any>(
@@ -199,7 +211,6 @@ export default function EnhancedTable({ data, filters, isLoading  }: TableProps)
             />
             <TableBody>
               {rows.map((row, index) => {
-                const isItemSelected = selected.includes(parseInt(row.id, 10));
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
@@ -207,10 +218,8 @@ export default function EnhancedTable({ data, filters, isLoading  }: TableProps)
                     hover
                     onClick={(event) => handleClick(event, parseInt(row.id, 10))}
                     role="checkbox"
-                    aria-checked={isItemSelected}
                     tabIndex={-1}
                     key={row.id}
-                    selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
                     <TableCell
@@ -223,7 +232,9 @@ export default function EnhancedTable({ data, filters, isLoading  }: TableProps)
                     </TableCell>
                     <TableCell align="right">{row.clientName}</TableCell>
                     <TableCell align="right">{row.loanDetails}</TableCell>
-                    <TableCell align="right">{row.keyDate}</TableCell>
+                    <TableCell align="right" sx={{
+                      color: formatKeyDate(row.keyDate),
+                    }}>{row.keyDate}</TableCell>
                     <TableCell align="right">{row.type}</TableCell>
                     <TableCell align="right">{row.contact}</TableCell>
                   </TableRow>
