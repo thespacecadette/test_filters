@@ -139,15 +139,16 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export const DATE_FORMAT = 'MM/DD/YYYY'
 
-export default function EnhancedTable({ data, filters, isLoading  }: TableProps) {
+export default function EnhancedTable({ data, filters, isLoading, pageSize }: TableProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('keyDate');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(4);
+  const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
   const [rows, setRows] = React.useState<Array<TableData>>([]);
 
   React.useEffect(() => {
+    console.log('child component data changed')
     const filteredData = getFilter(data, filters);
     const d = getRows(filteredData);
     const visibleRows = 
@@ -156,7 +157,7 @@ export default function EnhancedTable({ data, filters, isLoading  }: TableProps)
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     setRows(visibleRows);
-  }, [data.length > 0]);
+  }, [data.length > 0 || data]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,

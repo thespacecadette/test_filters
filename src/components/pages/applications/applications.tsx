@@ -28,19 +28,24 @@ interface ApplicationProps {
 }
 
 const Applications: React.FC<ApplicationProps> = ({  }) => {
-  const [activeTab, setActiveTab] = useState<string>(FILTER_TABS.FIXED_RATE_EXPIRY);
+  const [activeTab, setActiveTab] = useState<string>(FILTER_TABS.ALL);
   const [appData, setAppData] = useState<Array<Application>>([]);
   const [startDate, setStartDate] = useState(dayjs().subtract(30, 'day').toDate());
   const [endDate, setEndDate] = useState(dayjs().toDate());
   const [showCalendar, setCalendarView] = useState(false);
   const [pagination, setPagination] = useState(1);
+  const pageSize = 3;
 
   useEffect(() => {
-    services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}`)
-      .then((data) => {
+    services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}&size=${pageSize}`)
+    .then((data) => {
         setAppData(data.data);
     });
   }, []);
+
+  useEffect(() => {
+    console.log('new data and pagination', appData[0], pagination);
+  }, [appData]);
 
   return (
     <Card style={{
@@ -99,15 +104,12 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
       </AppBar>
     <InfiniteScroller
       onScrollToBottom={() => {
-        alert('Load data now that youre at the bottom');
         setPagination(pagination + 1);
-        
-        services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}`)
+        services.get(`${process.env.API_DOMAIN}/applications/get?page=${pagination}&size=${pageSize}`)
         .then((data) => {
+          console.log('____ is this the right data?', data)
             setAppData(data.data);
         });
-        // TODO: Add BE service to paginate data
-        // TODO: Update data set to next subset and update setAppData(payload) with response
        }}
       isLoading={appData.length === 0}
     >
@@ -119,6 +121,7 @@ const Applications: React.FC<ApplicationProps> = ({  }) => {
           endDate,
         }}
         isLoading={appData.length === 0}
+        pageSize={pageSize}
       />
     </InfiniteScroller>
   </Card>);

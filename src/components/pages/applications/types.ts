@@ -20,4 +20,5 @@ export interface TableProps {
     data: Array<Application>;
     filters: Filters;
     isLoading: boolean;
+    pageSize: number;
 }
