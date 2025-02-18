@@ -8,10 +8,16 @@ export interface TableData {
     type: string;
     contact: string;
 }
+
+
+export type Filters = {
+    activeTab: string;
+    startDate?: Date;
+    endDate?: Date;
+}
   
 export interface TableProps {
     data: Array<Application>;
+    filters: Filters;
     isLoading: boolean;
-    activeTab: string;
 }
-

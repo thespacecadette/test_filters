@@ -1,5 +1,10 @@
 import * as React from 'react';
-import moment from 'moment';
+
+// utils
+import dayjs from 'dayjs';
+import { visuallyHidden } from '@mui/utils';
+
+// components
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,17 +14,20 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 import Paper from '@mui/material/Paper';
-import { visuallyHidden } from '@mui/utils';
-import { Card } from '@mui/material';
-import { TableData, TableProps } from './types';
+import { Card, Typography } from '@mui/material';
+
+// types & data
+import { Filters, TableData, TableProps } from './types';
 import { FILTER_TABS, HEAD_CELLS } from './data';
+
+// pages
 import { Application } from '../../../../mock_api_service/model/Application';
 
 const getRows = (data: Array<Application>): Array<TableData> => data.map((application: Application) => ({
     id: application.id,
     clientName: application.client_account.name,
     loanDetails: `${application.lender_reference} | $${application.amount} | ${application.purpose}`,
-    keyDate: moment(Object.entries(application.attributes.key_dates)[0][1]).format('DD/MM/YYYY'),
+    keyDate: dayjs(Object.entries(application.attributes.key_dates)[0][1]).format(DATE_FORMAT),
     type: application.type,
     contact: `m: ${application.client_account.primary_applicant_info.mobile} | email: ${application.client_account.primary_applicant_info.email}`,
 }))
@@ -48,12 +56,30 @@ function getComparator<Key extends keyof any>(
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-function getFilter(data: Array<Application>, filter: string) {
-    return data.filter((application) => {
+function getFilter(data: Array<Application>, filters: Filters) {
+    let filteredRecords = [];
+
+    if (filters.activeTab !== FILTER_TABS.ALL) {
+      filteredRecords = data.filter((application) => {
         const keyDateLabel = Object.entries(application.attributes.key_dates)[0][0];
 
-        return keyDateLabel === filter;
-    })
+        return keyDateLabel === filters.activeTab;
+      });
+
+      filteredRecords = filteredRecords.filter((application) => {
+        const keyDateString = Object.entries(application.attributes.key_dates)[0][1];
+        const keyDate = new Date(keyDateString);
+        const validation = filters.startDate && filters.endDate && Object.prototype.toString.call(filters.startDate) && Object.prototype.toString.call(filters.endDate) === "[object Date]" && keyDate > filters.startDate && keyDate < filters.endDate;
+
+        return validation;
+      });
+
+      return filteredRecords;
+    } else {
+      filteredRecords = data;
+    }
+
+    return filteredRecords;
 };
 
 interface EnhancedTableProps {
@@ -99,7 +125,9 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   );
 }
 
-export default function EnhancedTable({ data, isLoading, activeTab }: TableProps) {
+export const DATE_FORMAT = 'MM/DD/YYYY'
+
+export default function EnhancedTable({ data, filters, isLoading  }: TableProps) {
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof TableData>('keyDate');
   const [selected, setSelected] = React.useState<readonly number[]>([]);
@@ -108,8 +136,7 @@ export default function EnhancedTable({ data, isLoading, activeTab }: TableProps
   const [rows, setRows] = React.useState<Array<TableData>>([]);
 
   React.useEffect(() => {
-    const filteredData = activeTab === FILTER_TABS.ALL ? data : getFilter(data, activeTab);
-    console.log('isFiltered', filteredData);
+    const filteredData = getFilter(data, filters);
     const d = getRows(filteredData);
     const visibleRows = 
         [...d]
@@ -117,7 +144,7 @@ export default function EnhancedTable({ data, isLoading, activeTab }: TableProps
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     setRows(visibleRows);
-  }, [isLoading === false && data.length > 0]);
+  }, [data.length > 0]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -157,6 +184,7 @@ export default function EnhancedTable({ data, isLoading, activeTab }: TableProps
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
+        {!!filters.startDate && !!filters.endDate && (<p>Results between {dayjs(filters.startDate).format(DATE_FORMAT)} and {dayjs(filters.endDate).format(DATE_FORMAT)}</p>)}
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
